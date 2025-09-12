@@ -1,0 +1,64 @@
+CREATE   PROCEDURE [dbo].[sp_ErrorMessageInfo]
+AS
+BEGIN
+
+	if exists (select name 
+			   from	  master.dbo.sysobjects
+			   where  name = 'DBAErrorMessage'
+				 and  type = 'U' )
+		Truncate table DBAErrorMessage
+	ELSE
+		CREATE TABLE DBAErrorMessage
+		(LogDate		DATETIME,
+		 ProcessInfo	VARCHAR(32),
+		 ErrorText		VARCHAR(1024)		
+		)
+
+	insert into DBAErrorMessage  EXEC xp_ReadErrorLog 0, 1, N'login failed'
+
+	--update DBAErrorMessage
+	--set LogDate = dateadd(MINUTE, -4, getdate())
+	--where logDate = '2024-01-09 06:44:06.240'
+
+	declare @ErrorCount	int
+	declare @Title					varchar(255)  
+	DECLARE @MessageOut				VARCHAR(max)  
+	declare @ErrorText				varchar(2000)
+
+
+
+	SELECT @ErrorCount = COUNT(*)
+	  FROM DBAErrorMessage
+	WHERE	logDate > DATEADD(MINUTE, -5, GETDATE())
+
+
+	PRINT @ErrorCount
+
+
+
+	IF @ErrorCount > 0  
+	  BEGIN
+		SET @Title	  = 'Failed Login for ' + @@SERVERNAME 
+
+		select top 1 @ErrorText = ErrorText 
+		  from DBAErrorMessage
+		 where logDate = ( select max(logDate) 
+		                     from DBAErrorMessage) 
+
+		SET @MessageOut = 'On ' + @@SERVERNAME + ', ' 
+		                + CONVERT(VARCHAR(20), @ErrorCount) + ' failed Login(s) were detected within the past 5 minutes. The last message = '
+						+ @ErrorText
+
+		EXEC msdb.dbo.sp_send_dbmail  
+			 @recipients = 'YOurEmailHere@YourCompany.com; 7705551212@vtext.com; ',  
+			 @subject = @Title,         
+			 @body = @MessageOut  
+ 
+		PRINT	@Title
+		PRINT	@MessageOut
+
+	  END
+	ELSE
+		PRINT 'No Failed Logins'
+
+END
