@@ -1,0 +1,60 @@
+---  ***************  Create Master Key  ***********************   
+
+IF NOT EXISTS (SELECT * FROM sys.symmetric_keys WHERE symmetric_key_id = 101)
+BEGIN
+ PRINT 'Creating Database Master Key'
+ CREATE MASTER KEY 
+  ENCRYPTION BY PASSWORD = 'T0t0, I Dont Th!nk WE @re in                            				Kansas anymore!';
+END
+	ELSE
+	  PRINT 'Master Key Already Exists'
+
+--- ********************   Create Certificates  ***************************
+
+CREATE CERTIFICATE EncryptionCertificateBackup1   
+  WITH SUBJECT = 'SQL Server Backup Encryption Certificate',   
+   EXPIRY_DATE = '20311114’;
+
+CREATE CERTIFICATE EncryptionCertificateBackup2   
+ ENCRYPTION BY PASSWORD = 'A R@nd0m1y G3nerated Pa$$w0rd’
+  WITH SUBJECT = 'SQL Server Backup Encryption Certificate',   
+   EXPIRY_DATE = '20311114';
+
+--- *************   Backup Certifictes     ***********************************
+
+BACKUP CERTIFICATE EncryptionCertificateBackup1 
+   TO FILE = 'c:\storedcerts\EncCertBackup1.BAK’  
+WITH PRIVATE KEY 
+( FILE = ' 'c:\storedcerts\ EncCertBackup1.PKK' ,   
+  ENCRYPTION BY PASSWORD 
+      = '>Save This P@$$word in y0ur Password VaulT’ );  
+GO 
+
+---  ***************  Backup with Encryption   ******************************* 
+
+Backup Database [Database1] 
+	to disk = 'C:\Backups\Database1-20240114105500.BAK'
+	with compression , 
+	ENCRYPTION 
+		(ALGORITHM = aes_256, 
+		 SERVER CERTIFICATE =  EncryptionCertificateBackup1)
+
+
+-- ***********************  Restore Certificate   *********************************
+
+CREATE CERTIFICATE EncryptionCertificateSystem1 
+ FROM FILE = 'c:\storedcerts\System1EncCert.bak’ 
+ WITH PRIVATE KEY ( FILE = 'c:\storedcerts\System1EncCert.PKK’ 
+ DECRYPTION BY PASSWORD
+		= '>SaveD P@$$word from y0ur Password VaulT';
+
+--  *************************  Restore DB - no PW or Certificate needed, it just works ***********************
+Restore Database [Database1] 
+ From disk = 'c:\Backups\Database1-2023-01-09_105500.BAK’
+WITH RECOVERY
+
+
+
+
+
+
