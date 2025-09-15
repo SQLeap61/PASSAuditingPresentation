@@ -3,14 +3,7 @@ GO
 
 /****** Eric Peterson - [dbo].[sp_BackupInfo]     9/12/2025  ******/
 
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-CREATE   Procedure [dbo].[sp_BackupInfo] 
+CREATE or Alter Procedure [dbo].[sp_BackupInfo] 
 (@LegacyDB Varchar(10) = 'No' )
 
 As
@@ -45,6 +38,9 @@ SELECT
         MAX(s.backup_start_date)							AS 'LastFullBackup' ,
         ISNULL(d.state_desc, 'Disconnected') AS 'DBState' ,
 		d.recovery_model_desc,
+		Case 
+			When d.is_encrypted > 0 then 'Yes'
+			Else 'No'     end			as DBEncrypt,
 		create_date,
 		Case 
 			When d.source_database_Id > 0 then 'Yes'
@@ -69,7 +65,7 @@ Where   ( s.type = 'D'
         AND ISNULL(d.name, ( s.database_name )) NOT IN ( 'tempdb',
                                                          'distribution' )
 GROUP BY ISNULL(d.name, ( s.database_name + ' (Legacy)' )) ,
-        d.state_desc, d.recovery_model_desc, d.source_database_Id, create_date--, s.encryptor_type, s.key_algorithm,s.encryptor_thumbprint  --, dev.logical_device_name, dev.physical_device_name
+        d.state_desc, d.recovery_model_desc, d.source_database_Id, create_date, d.is_encrypted--, s.encryptor_type, s.key_algorithm,s.encryptor_thumbprint  --, dev.logical_device_name, dev.physical_device_name
 Order By 2
 
 --  select * from  #BU_FullStart order by 1, 2
@@ -188,6 +184,7 @@ Select	ServerProperty('ServerName')					As [SQLServerName],
 				Else Fbk.LastFullBackup     End				As 'LastFullBackup/Snapshot',
 		s.backup_size										As 'BackupSize',
 		FBK.DBState                                         As 'DBState',
+		FBK.DBEncrypt,
 		Case s.is_copy_only  
 		When 1
 		    Then 'Yes'
@@ -238,8 +235,5 @@ Left Outer Join 	#BU_ListingDiff Diff
 Where Fbk.DBName Not Like '%(' + @LegacyDB + ')%'
 Order By Fbk.DBName
 
---  sp_backupInfo
-
+--  sp_backuplisting
 GO
-
-
