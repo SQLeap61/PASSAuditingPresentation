@@ -1,0 +1,6 @@
+Create or Alter Procedure [dbo].[sp_CertificateInfo]
+As 
+Select * 
+From sys.certificates 
+Where name Not Like '##%'
+GO
