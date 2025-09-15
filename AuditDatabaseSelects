@@ -1,0 +1,37 @@
+USE [NYCTaxi_Sample]
+
+GO
+
+CREATE SERVER AUDIT [PrincipalAudit]
+TO FILE 
+(	FILEPATH = N'C:\SQLStuff\'
+	,MAXSIZE = 0 MB
+	,MAX_ROLLOVER_FILES = 2147483647
+	,RESERVE_DISK_SPACE = OFF
+) WITH (QUEUE_DELAY = 1000, ON_FAILURE = CONTINUE, AUDIT_GUID = 'e53d0bbe-65ae-4727-b742-774e1fdf0a30')
+ALTER SERVER AUDIT [PrincipalAudit] WITH (STATE = ON)
+GO
+
+USE [NYCTaxi_Sample]
+GO
+
+CREATE DATABASE AUDIT SPECIFICATION [DatabaseAuditSpecification-20250915-152325]
+FOR SERVER AUDIT [PrincipalAudit]
+ADD (SELECT ON DATABASE::[NYCTaxi_Sample] BY [public])
+WITH (STATE = ON)
+GO
+
+
+
+
+SELECT
+       event_time ,
+       session_server_principal_name AS UserName ,
+       server_instance_name ,
+       database_name ,
+       object_name ,
+       statement
+  FROM sys.fn_get_audit_file('C:\SQLStuff\*.sqlaudit', DEFAULT, DEFAULT)
+WHERE  action_id = 'SL'
+  AND  Object_name = 'nyctaxi_sample' 
+       -- database_name = 'NYCTaxi_Sample'
