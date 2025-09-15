@@ -1,0 +1,154 @@
+--  ********  Temporal table demo scripts  ******************************
+--Create database TemporalDemo
+--  with ledger = on;
+
+--  Drop table Hotel
+
+
+CREATE TABLE Hotel (
+    PropertyID INT IDENTITY(1,1),
+    HotelName NVARCHAR(200) NOT NULL,
+    Description NVARCHAR(MAX) NULL,
+    AddressLine1 NVARCHAR(200) NOT NULL,
+    AddressLine2 NVARCHAR(200) NULL,
+    City NVARCHAR(100) NOT NULL,
+    StateProvince NVARCHAR(100) NULL,
+    PostalCode NVARCHAR(20) NULL,
+    Country NVARCHAR(100) NOT NULL,
+    PhoneNumber NVARCHAR(20) NULL,
+    Email NVARCHAR(150) NULL,
+    Website NVARCHAR(200) NULL,
+    StarRating DECIMAL(2,1) NULL, -- e.g., 4.5
+    NumberOfRooms INT NULL,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    UpdatedAt DATETIME2 DEFAULT GETDATE()
+);
+
+
+
+--*************************** Table has have a primary key *************************
+ALTER TABLE Hotel
+ADD CONSTRAINT PK_Hotel_PropertyId PRIMARY KEY CLUSTERED (PropertyId);
+GO
+
+--- ***********************   Add data
+
+INSERT INTO Hotel (HotelName, Description, AddressLine1, AddressLine2, City, StateProvince, PostalCode, Country, PhoneNumber, Email, Website, StarRating, NumberOfRooms) VALUES
+('Hotel 1', 'Sample description for Hotel 1', '1 Main Street', NULL, 'City1', 'StateX', '10001', 'USA', '(555) 123-0001', 'hotel1@example.com', 'http://www.hotel1.com', 3.5, 120),
+('Hotel 2', 'Sample description for Hotel 2', '2 Main Street', NULL, 'City2', 'StateX', '10002', 'USA', '(555) 123-0002', 'hotel2@example.com', 'http://www.hotel2.com', 4.0, 95),
+('Hotel 3', 'Sample description for Hotel 3', '3 Main Street', NULL, 'City3', 'StateX', '10003', 'USA', '(555) 123-0003', 'hotel3@example.com', 'http://www.hotel3.com', 2.5, 140),
+('Hotel 4', 'Sample description for Hotel 4', '4 Main Street', NULL, 'City4', 'StateX', '10004', 'USA', '(555) 123-0004', 'hotel4@example.com', 'http://www.hotel4.com', 5.0, 220),
+('Hotel 5', 'Sample description for Hotel 5', '5 Main Street', NULL, 'City5', 'StateX', '10005', 'USA', '(555) 123-0005', 'hotel5@example.com', 'http://www.hotel5.com', 3.0, 180),
+('Hotel 6', 'Sample description for Hotel 6', '6 Main Street', NULL, 'City6', 'StateX', '10006', 'USA', '(555) 123-0006', 'hotel6@example.com', 'http://www.hotel6.com', 4.5, 75),
+('Hotel 7', 'Sample description for Hotel 7', '7 Main Street', NULL, 'City7', 'StateX', '10007', 'USA', '(555) 123-0007', 'hotel7@example.com', 'http://www.hotel7.com', 2.0, 160),
+('Hotel 8', 'Sample description for Hotel 8', '8 Main Street', NULL, 'City8', 'StateX', '10008', 'USA', '(555) 123-0008', 'hotel8@example.com', 'http://www.hotel8.com', 4.2, 200),
+('Hotel 9', 'Sample description for Hotel 9', '9 Main Street', NULL, 'City9', 'StateX', '10009', 'USA', '(555) 123-0009', 'hotel9@example.com', 'http://www.hotel9.com', 3.8, 130),
+('Hotel 10', 'Sample description for Hotel 10', '10 Main Street', NULL, 'City10', 'StateX', '10010', 'USA', '(555) 123-0010', 'hotel10@example.com', 'http://www.hotel10.com', 4.7, 85),
+('Hotel 11', 'Sample description for Hotel 11', '11 Main Street', NULL, 'City11', 'StateX', '10011', 'USA', '(555) 123-0011', 'hotel11@example.com', 'http://www.hotel11.com', 3.1, 145),
+('Hotel 12', 'Sample description for Hotel 12', '12 Main Street', NULL, 'City12', 'StateX', '10012', 'USA', '(555) 123-0012', 'hotel12@example.com', 'http://www.hotel12.com', 4.9, 210),
+('Hotel 13', 'Sample description for Hotel 13', '13 Main Street', NULL, 'City13', 'StateX', '10013', 'USA', '(555) 123-0013', 'hotel13@example.com', 'http://www.hotel13.com', 2.7, 175),
+('Hotel 14', 'Sample description for Hotel 14', '14 Main Street', NULL, 'City14', 'StateX', '10014', 'USA', '(555) 123-0014', 'hotel14@example.com', 'http://www.hotel14.com', 3.6, 155),
+('Hotel 15', 'Sample description for Hotel 15', '15 Main Street', NULL, 'City15', 'StateX', '10015', 'USA', '(555) 123-0015', 'hotel15@example.com', 'http://www.hotel15.com', 4.3, 195),
+('Hotel 16', 'Sample description for Hotel 16', '16 Main Street', NULL, 'City16', 'StateX', '10016', 'USA', '(555) 123-0016', 'hotel16@example.com', 'http://www.hotel16.com', 3.9, 110),
+('Hotel 17', 'Sample description for Hotel 17', '17 Main Street', NULL, 'City17', 'StateX', '10017', 'USA', '(555) 123-0017', 'hotel17@example.com', 'http://www.hotel17.com', 2.8, 240),
+('Hotel 18', 'Sample description for Hotel 18', '18 Main Street', NULL, 'City18', 'StateX', '10018', 'USA', '(555) 123-0018', 'hotel18@example.com', 'http://www.hotel18.com', 4.1, 190),
+('Hotel 19', 'Sample description for Hotel 19', '19 Main Street', NULL, 'City19', 'StateX', '10019', 'USA', '(555) 123-0019', 'hotel19@example.com', 'http://www.hotel19.com', 3.4, 100),
+('Hotel 20', 'Sample description for Hotel 20', '20 Main Street', NULL, 'City20', 'StateX', '10020', 'USA', '(555) 123-0020', 'hotel20@example.com', 'http://www.hotel20.com', 4.6, 170);
+
+-- select * from Hotel
+
+
+
+
+
+--********** Table has to have a Period columns: SysStartTime, SysEndTime **********
+
+ALTER TABLE dbo.hotel 
+ADD SysStartTime DATETIME2 GENERATED ALWAYS AS ROW START ----  HIDDEN
+		CONSTRAINT DF_Hotel_SysStartTime DEFAULT SYSUTCDATETIME(),
+	SysEndTime DATETIME2 GENERATED ALWAYS AS ROW END ---- HIDDEN
+		CONSTRAINT DF_Hotel_SysEndTime 
+		DEFAULT CONVERT (DATETIME2, '9999-12-31 23:59:59.9999999'),
+PERIOD FOR SYSTEM_TIME (SysStartTime, SysEndTime);
+GO
+
+--************************** Table Add/Remove Versioning ***************************
+Create Schema History 
+
+Alter Table dbo.Hotel
+   set (SYSTEM_VERSIONING = ON (HISTORY_TABLE = History.Hotel , DATA_CONSISTENCY_CHECK = ON ))--< Schmea history
+
+Alter Table dbo.Hotel
+      set (SYSTEM_VERSIONING = OFF )
+
+	  
+GO
+
+
+
+--**********************  Temporal Query Extensions ***********************
+
+select * from hotel
+select * from History.Hotel
+
+Select getutcdate() --  2025-09-15 01:59:36.713
+
+update hotel
+   set hotelName = 'The ONE Hotel'
+   where PropertyID = 1
+
+select * from hotel
+select * from History.Hotel
+
+Select getutcdate() --  2025-09-15 01:59:36.713
+
+update hotel
+   set hotelName = 'The ONE and Only Hotel'
+   where PropertyID = 1
+
+
+select * from hotel
+select * from History.Hotel
+
+
+--      ALLOWS Query against base table only   
+
+--*********** Query Extension AS OF **********
+SELECT * 
+FROM hotel                                      --< Notice goes against the base hotel table
+FOR SYSTEM_TIME AS OF '2025-09-15 01:59:36.713' --< Current record
+WHERE PropertyId = 1 
+
+
+
+--*********** Query Extension   From and Between  **********
+--Returns multiple rows for range of time.
+--Almost identical, between matches upper and lower bounds  
+--Scans both base and history table 
+
+SELECT * 
+  FROM Hotel
+   FOR SYSTEM_TIME From '2025-09-15 01:40:36.713' 
+					 to '2025-09-15 01:59:36.713' 
+ WHERE PropertyId = 1  
+
+SELECT * 
+  FROM Hotel
+   FOR SYSTEM_TIME BETWEEN '2025-09-15 01:40:36.713' 	
+                       and '2025-09-15 01:59:36.713' 
+ WHERE PropertyId = 1
+
+ -- *********************  Contained in  ************************
+
+-- Contained in
+--Returns multiple rows for range of time.
+--Records that were opened and closed within the time period specified. 
+--Scans only history table
+
+SELECT * 
+  FROM Hotel
+   FOR SYSTEM_TIME 
+       CONTAINED IN ('2025-09-15 01:40:36.713', '2025-09-15 01:59:36.713' )
+ WHERE PropertyId = 1  
+
+
