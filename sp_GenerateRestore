@@ -1,0 +1,121 @@
+USE [master]
+GO
+
+/****** StoredProcedure [dbo].[sp_GenerateRestore]   by Eric Peterson ******/
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE OR ALTER         Procedure [dbo].[sp_GenerateRestore] 
+	(@DBName				sysname,
+	 @StartDate				DateTime = Null ) -- not implemented yet
+As
+
+Begin
+  --Declare @DBName					sysname;
+  --Declare @StartDate				DateTime;
+  --  Set @DBName = 'xxx';
+
+Declare @backup_set_id_start	Int;
+Declare @backup_set_id_end		Int;
+Declare @Backup_Set_Diff_id		Int;
+Declare @BUFileList				Varchar(8000)
+Declare @BUFileName				Varchar(1000)
+-- set database to be used 
+
+Select @backup_set_id_start = Max(backup_set_id)
+From   msdb.dbo.backupset
+Where  database_name = @DBName
+       And type = 'D';
+
+Select @backup_set_id_end = Min(backup_set_id)
+From   msdb.dbo.backupset
+Where  database_name = @DBName
+       And type = 'D'
+       And backup_set_id > @backup_set_id_start;
+
+If @backup_set_id_end Is Null
+    Set @backup_set_id_end = 999999999;
+
+Select  @Backup_Set_Diff_id	 = Max(backup_set_id)
+From	msdb.dbo.backupset b
+Where	b.database_name = @DBName
+   And	b.backup_set_id >= @backup_set_id_start
+   And	b.type = 'I'
+
+
+
+
+Print @Backup_Set_Id_Start
+Print @Backup_Set_Id_end
+Print @Backup_Set_Diff_id	
+
+
+
+
+Declare BFCursor Cursor
+For 
+Select mf.physical_device_name 
+From   msdb.dbo.backupset b,
+       msdb.dbo.backupmediafamily mf
+Where  b.media_set_id = mf.media_set_id
+       And b.database_name = @DBName
+       And b.backup_set_id = @backup_set_id_start
+
+Open BFCursor
+
+Fetch BFCursor
+Into @BUFileName
+
+Set @BUFileList = ' '
+
+While @@Fetch_Status = 0
+  Begin
+	Set @BUFileList = @BuFileList + ', ''' + @BUFileName + ''''
+
+	Fetch BFCursor
+	Into @BUFileName
+
+  End
+
+set @BUFileList = Replace(@BUFileList, ' ,', '')
+
+Print @BUFileList
+
+Close BFCursor
+
+Deallocate BFCursor
+
+
+Select @backup_set_id_start As Backup_set_id,  
+		IsNull( 'RESTORE DATABASE [' + @DBName + '] FROM DISK = ' + @BUFileList + ' WITH NORECOVERY', 'No Backup for database ' +@DBName ) As RestoreCommand
+Union
+Select  backup_set_id,  -- DIFF Backup
+		'RESTORE DATABASE [' + @DBName + '] FROM DISK = ''' + mf.physical_device_name + ''' WITH NORECOVERY'
+From   msdb.dbo.backupset b,
+       msdb.dbo.backupmediafamily mf
+Where  b.media_set_id = mf.media_set_id
+       And b.database_name = @DBName
+       And b.backup_set_id = @Backup_Set_Diff_id
+Union                   
+Select  backup_set_id,    -- Trans Backup
+       'RESTORE LOG [' + @DBName + '] FROM DISK = ''' + mf.physical_device_name + ''' WITH NORECOVERY'
+From   msdb.dbo.backupset b,
+       msdb.dbo.backupmediafamily mf
+Where  b.media_set_id = mf.media_set_id
+       And b.database_name =  @DBName
+       And b.backup_set_id >= IsNull(@Backup_Set_Diff_id, @Backup_Set_Id_Start )
+       And b.backup_set_id <  @backup_set_id_end
+       And b.type = 'L'
+Union
+Select 999999999 As backup_set_id,
+       'RESTORE DATABASE [' + @DBName + '] WITH RECOVERY'
+Order By backup_set_id;
+
+End
+GO
+
+
