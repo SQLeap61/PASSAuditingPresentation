@@ -2,11 +2,6 @@ USE [master]
 GO
 
 /******   StoredProcedure [dbo].[sp_AuditInfo]  by  Eric Peterson ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
 
 CREATE OR ALTER     Procedure [dbo].[sp_AuditInfo]
 (@LoginIn		sysname = NULL,
@@ -23,10 +18,15 @@ Set NoCount On
 -- DROP TABLE #SecurityAccess
 -- drop table #DBPermList
 
+--- variables for testing 
+--  declare @LoginIn		sysname
+--  declare @GenerateRoles	Varchar(256)
+
 CREATE TABLE #SecurityAccess
     ( SQLServerName sysname,
       LoginName     sysname,
 	  LastModified  varchar(32),
+	  PWLastChanged	varchar(32),
 	  LastAccess	Varchar(32) Null,
       DefaultDB     sysname null,
       Active        CHAR(3),
@@ -120,7 +120,8 @@ CREATE TABLE #DBPermList
 
 INSERT INTO #SecurityAccess ( SQLServerName,
                               LoginName,
-							   LastModified,
+							  LastModified,
+							  PWLastChanged,
 							  LastAccess,
                               DefaultDB,
                               Active,
@@ -204,6 +205,7 @@ INSERT INTO #SecurityAccess ( SQLServerName,
 SELECT  @@servername   AS 'SQLServerName',
         L.name         AS 'Login',
 		updatedate     AS 'LastModified', 
+		convert(varchar(32), LOGINPROPERTY(l.name, 'PasswordLastSetTime') ) as PWLastChanged,
 		accdate        As 'LastAccess',  --  Column is not accurate and Not supported by MS.  
         dbname        AS 'DefaultDB',
         CASE L.hasaccess
@@ -338,7 +340,7 @@ From #SecurityAccess  SA
 				Group BY login_name ) DMS
 
 INSERT INTO #SecurityAccess --(SQLServerName, [LoginName], [LastAccess],'[Master], MSDB , Model) 
-VALUES ( @@SERVERNAME, '>>>>>>>DatabaseListing>>>>>>>> ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',' ',' ',' ',' ',' ', ' ', ' ', ' ', ' ', ' ', ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ') 
+VALUES ( @@SERVERNAME, '>>>>>>>DatabaseListing>>>>>>>> ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',' ',' ',' ',' ',' ', ' ', ' ', ' ', ' ', ' ', ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ') 
  
  
  -- select count(*) from sysdatabases
@@ -594,5 +596,9 @@ If @GenerateRoles = 'Yes'
  Drop Table #DBPermList;
 
 GO
+
+
+
+
 
 
