@@ -1,0 +1,29 @@
+USE [master]
+GO
+
+/******   UserDefinedFunction [dbo].[fn_SQLServerBackupDir]    Eric Peterson 9/22/2025 3:45:24 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE OR ALTER FUNCTION [dbo].[fn_SQLServerBackupDir]()
+RETURNS NVARCHAR(4000)
+AS
+BEGIN
+
+   DECLARE @path NVARCHAR(4000)
+
+   EXEC master.dbo.xp_instance_regread
+            N'HKEY_LOCAL_MACHINE',
+            N'Software\Microsoft\MSSQLServer\MSSQLServer',N'BackupDirectory',
+            @path OUTPUT, 
+            'no_output'
+   RETURN @path
+
+END;
+GO
+
+
